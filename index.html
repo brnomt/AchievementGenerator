@@ -80,7 +80,9 @@
         const bottomColorPicker = document.getElementById('bottomColorPicker');
 
         // Estado
-        let currentIconId = 'grass_block';
+        // Buscamos un icono inicial válido (Grass_Block o el primero de la lista)
+        const initialItem = items.find(i => i.id === 'Grass_Block') || items[0];
+        let currentIconData = initialItem;
         const fontName = 'Minecraftia'; 
         
         // Colores Minecraft
@@ -110,10 +112,10 @@
         bgImage.onerror = () => console.warn("Fondo no encontrado.");
 
         const iconImage = new Image();
-        iconImage.crossOrigin = "Anonymous";
         iconImage.onload = () => draw();
 
-        // --- Inicialización de Colores ---
+        // --- Inicialización ---
+
         function setupColorControl(select, picker, defaultKey) {
             for (const [key, val] of Object.entries(mcColors)) {
                 const option = document.createElement('option');
@@ -146,9 +148,8 @@
         // --- Lógica del Grid de Iconos ---
 
         function formatName(id) {
-            return id.split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
+            // El ID ya viene con mayúsculas de los archivos
+            return id.replace(/_/g, ' ');
         }
 
         function renderGrid(filter = "") {
@@ -156,39 +157,41 @@
             const lowerFilter = filter.toLowerCase();
             
             // Filtrar items
-            const filteredItems = items.filter(id => {
-                return id.includes(lowerFilter) || formatName(id).toLowerCase().includes(lowerFilter);
-            });
+            const filteredItems = items.filter(item => {
+                return item.id.toLowerCase().includes(lowerFilter) || formatName(item.id).toLowerCase().includes(lowerFilter);
+            }).slice(0, 500); // Limitamos a 500 para rendimiento de renderizado inicial
 
-            // Renderizar items (lazy load simple con URLs)
-            filteredItems.forEach(id => {
+            // Renderizar items
+            filteredItems.forEach(item => {
                 const slot = document.createElement('div');
-                slot.className = `icon-slot ${id === currentIconId ? 'selected' : ''}`;
-                slot.title = formatName(id); // Tooltip
-                slot.dataset.id = id;
+                slot.className = `icon-slot ${item.id === currentIconData?.id ? 'selected' : ''}`;
+                slot.title = formatName(item.id);
+                slot.dataset.id = item.id;
                 
                 const img = document.createElement('img');
-                img.src = `https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/item/${id}.png`;
-                img.alt = id;
-                img.loading = 'lazy'; // Importante para rendimiento
+                img.src = `assets/icons2/${item.id}.${item.ext}`;
+                img.alt = item.id;
+                img.loading = 'lazy';
                 
                 slot.appendChild(img);
                 
                 slot.addEventListener('click', () => {
-                    selectIcon(id);
+                    selectIcon(item);
                 });
 
                 iconGrid.appendChild(slot);
             });
         }
 
-        function selectIcon(id) {
-            currentIconId = id;
+        function selectIcon(item) {
+            currentIconData = item;
             // Update visual selection
             document.querySelectorAll('.icon-slot').forEach(el => el.classList.remove('selected'));
-            const active = document.querySelector(`.icon-slot[data-id="${id}"]`);
+            const active = document.querySelector(`.icon-slot[data-id="${item.id}"]`);
             if(active) active.classList.add('selected');
-
+            
+            // Load image
+            iconImage.src = `assets/icons2/${item.id}.${item.ext}`;
         }
 
         // Búsqueda en Grid
@@ -203,9 +206,8 @@
                 const reader = new FileReader();
                 reader.onload = (evt) => {
                     iconImage.src = evt.target.result;
-                    // Deseleccionar grid visualmente
                     document.querySelectorAll('.icon-slot').forEach(el => el.classList.remove('selected'));
-                    currentIconId = 'custom';
+                    currentIconData = { id: 'custom' };
                 };
                 reader.readAsDataURL(file);
             }
@@ -278,12 +280,9 @@
         
         // Init
         document.fonts.ready.then(draw);
-        renderGrid(); // Renderizar grid inicial
-        updateIconImage('grass_block'); // Cargar icono inicial si no está en cache
-        
-        function updateIconImage(id) {
-             const url = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${id}.png`;
-             iconImage.src = url;
+        renderGrid(); 
+        if (currentIconData) {
+            iconImage.src = `assets/icons2/${currentIconData.id}.${currentIconData.ext}`;
         }
 
     </script>
