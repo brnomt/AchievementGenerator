@@ -44,6 +44,19 @@
                     <select id="topColorSelect" title="Minecraft Color"></select>
                     <input type="color" id="topColorPicker" value="#FFFF55" title="Custom Color">
                 </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="topGradientCheck">
+                        <label for="topGradientCheck" style="font-size: 0.8rem; margin: 0; cursor: pointer;">Gradient</label>
+                    </div>
+                    
+                    <input type="color" id="topGradientColorPicker" value="#FFAA00" title="Gradient Color" disabled style="width: 50px; height: 45px; cursor: pointer;">
+                    
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="topGradientHorizontalCheck" disabled>
+                        <label for="topGradientHorizontalCheck" style="font-size: 0.8rem; margin: 0; cursor: pointer;">Horizontal</label>
+                    </div>
+                </div>
             </div>
 
             <div class="input-group">
@@ -120,6 +133,11 @@
         const topColorPicker = document.getElementById('topColorPicker');
         const bottomColorSelect = document.getElementById('bottomColorSelect');
         const bottomColorPicker = document.getElementById('bottomColorPicker');
+
+        // Gradient Controls
+        const topGradientCheck = document.getElementById('topGradientCheck');
+        const topGradientColorPicker = document.getElementById('topGradientColorPicker');
+        const topGradientHorizontalCheck = document.getElementById('topGradientHorizontalCheck');
 
         // Estado
         // Buscamos un icono inicial válido (Grass_Block o el primero de la lista)
@@ -291,7 +309,23 @@
             // Top Text
             const topSize = topFontSizeInput.value;
             ctx.font = `${topSize}px "Minecraftia", "Press Start 2P", monospace`;
-            ctx.fillStyle = topColorPicker.value;
+            
+            if (topGradientCheck.checked) {
+                let gradient;
+                if (topGradientHorizontalCheck.checked) {
+                    const textWidth = ctx.measureText(topTextInput.value).width;
+                    gradient = ctx.createLinearGradient(textX, 60, textX + textWidth, 60);
+                } else {
+                    gradient = ctx.createLinearGradient(textX, 60, textX, 60 + parseInt(topSize));
+                }
+                
+                gradient.addColorStop(0, topColorPicker.value);
+                gradient.addColorStop(1, topGradientColorPicker.value);
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = topColorPicker.value;
+            }
+            
             ctx.shadowColor = "#000000"; 
             ctx.shadowOffsetX = 4;
             ctx.shadowOffsetY = 4;
@@ -328,6 +362,14 @@
         topFontSizeInput.addEventListener('input', draw);
         bottomFontSizeInput.addEventListener('input', draw);
         iconSizeInput.addEventListener('input', draw);
+        
+        topGradientCheck.addEventListener('change', () => {
+            topGradientColorPicker.disabled = !topGradientCheck.checked;
+            topGradientHorizontalCheck.disabled = !topGradientCheck.checked;
+            draw();
+        });
+        topGradientColorPicker.addEventListener('input', draw);
+        topGradientHorizontalCheck.addEventListener('change', draw);
         
         // Init
         document.fonts.ready.then(draw);
