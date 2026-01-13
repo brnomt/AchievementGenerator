@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <h1>Generador de Logros</h1>
+    <h1>Achievement Generator</h1>
 
     <div class="app-layout">
         
@@ -17,41 +17,41 @@
         <div class="panel config-panel">
             
             <div class="input-group">
-                <label for="topText">Texto Superior</label>
+                <label for="topText">Upper Text</label>
                 <div class="text-controls">
-                    <input type="text" id="topText" value="¡Logro obtenido!">
-                    <select id="topColorSelect" title="Color de Minecraft"></select>
-                    <input type="color" id="topColorPicker" value="#FFFF55" title="Color Personalizado">
+                    <input type="text" id="topText" value="Achievement Get!">
+                    <select id="topColorSelect" title="Minecraft Color"></select>
+                    <input type="color" id="topColorPicker" value="#FFFF55" title="Custom Color">
                 </div>
             </div>
 
             <div class="input-group">
-                <label for="bottomText">Texto Inferior</label>
+                <label for="bottomText">Bottom Text</label>
                 <div class="text-controls">
-                    <input type="text" id="bottomText" value="Madera Nueva">
-                    <select id="bottomColorSelect" title="Color de Minecraft"></select>
-                    <input type="color" id="bottomColorPicker" value="#FFFFFF" title="Color Personalizado">
+                    <input type="text" id="bottomText" value="Getting grass?...">
+                    <select id="bottomColorSelect" title="Minecraft Color"></select>
+                    <input type="color" id="bottomColorPicker" value="#FFFFFF" title="Custom Color">
                 </div>
             </div>
 
             <div class="preview-area">
-                <canvas id="canvas" width="320" height="64" style="display: block; max-width: 100%; height: auto; image-rendering: pixelated;"></canvas>
+                <canvas id="canvas" width="1000" height="221" style="display: block; max-width: 100%; height: auto; image-rendering: pixelated;"></canvas>
             </div>
 
-            <button onclick="window.downloadImage()">Descargar PNG</button>
+            <button onclick="window.downloadImage()">Download PNG</button>
         </div>
 
-        <!-- Panel Derecho: Selector de Íconos -->
+        <!-- Right Panel: Icon Selector -->
         <div class="panel icon-panel">
-            <h3>Seleccionar Ícono</h3>
-            <input type="text" id="iconGridSearch" class="icon-search-bar" placeholder="Buscar ícono..." autocomplete="off">
+            <h3>Select Icon</h3>
+            <input type="text" id="iconGridSearch" class="icon-search-bar" placeholder="Search icon..." autocomplete="off">
             
             <div id="iconGrid" class="icon-grid">
-                <!-- Se llena con JS -->
+                <!-- Filled with JS -->
             </div>
 
             <div class="custom-upload-group">
-                <label for="customIconInput">Subir textura personalizada:</label>
+                <label for="customIconInput">Upload Custom Texture:</label>
                 <div class="file-input-wrapper">
                     <input type="file" id="customIconInput" accept="image/*">
                 </div>
@@ -59,6 +59,16 @@
         </div>
 
     </div>
+
+    <footer>
+        <div class="footer-links">
+            <p>Made with ❤️ by: <a href="https://github.com/brnomt" target="_blank">brnomt</a> & <a href="https://github.com/iamnotSnoker" target="_blank">Snoker</a></p>
+        </div>
+        <a href="https://github.com/brnomt/AdvancementGenerator" target="_blank" class="github-link">View source on GitHub</a>
+        <div class="donate-container">
+            <a href="https://www.paypal.com/donate/?hosted_button_id=GWVA5XBU7V3GL" class="donate-btn">☕ Buy me a coffee!</a>
+        </div>
+    </footer>
 
     <script type="module">
         import { items } from './src/items.js';
@@ -87,22 +97,22 @@
         
         // Colores Minecraft
         const mcColors = {
-            'yellow': { name: 'Amarillo', hex: '#FFFF55' },
-            'white': { name: 'Blanco', hex: '#FFFFFF' },
-            'gold': { name: 'Oro', hex: '#FFAA00' },
-            'green': { name: 'Verde', hex: '#55FF55' },
-            'dark_green': { name: 'Verde Oscuro', hex: '#00AA00' },
-            'red': { name: 'Rojo', hex: '#FF5555' },
-            'dark_red': { name: 'Rojo Oscuro', hex: '#AA0000' },
+            'yellow': { name: 'Yellow', hex: '#FFFF55' },
+            'white': { name: 'White', hex: '#FFFFFF' },
+            'gold': { name: 'Gold', hex: '#FFAA00' },
+            'green': { name: 'Green', hex: '#55FF55' },
+            'dark_green': { name: 'Dark Green', hex: '#00AA00' },
+            'red': { name: 'Red', hex: '#FF5555' },
+            'dark_red': { name: 'Dark Red', hex: '#AA0000' },
             'aqua': { name: 'Aqua', hex: '#55FFFF' },
-            'dark_aqua': { name: 'Aqua Oscuro', hex: '#00AAAA' },
-            'blue': { name: 'Azul', hex: '#5555FF' },
-            'dark_blue': { name: 'Azul Oscuro', hex: '#0000AA' },
-            'light_purple': { name: 'Rosa', hex: '#FF55FF' },
-            'dark_purple': { name: 'Morado', hex: '#AA00AA' },
-            'gray': { name: 'Gris', hex: '#AAAAAA' },
-            'dark_gray': { name: 'Gris Oscuro', hex: '#555555' },
-            'black': { name: 'Negro', hex: '#000000' }
+            'dark_aqua': { name: 'Dark Aqua', hex: '#00AAAA' },
+            'blue': { name: 'Blue', hex: '#5555FF' },
+            'dark_blue': { name: 'Dark Blue', hex: '#0000AA' },
+            'light_purple': { name: 'Light Purple', hex: '#FF55FF' },
+            'dark_purple': { name: 'Dark Purple', hex: '#AA00AA' },
+            'gray': { name: 'Gray', hex: '#AAAAAA' },
+            'dark_gray': { name: 'Dark Gray', hex: '#555555' },
+            'black': { name: 'Black', hex: '#000000' }
         };
 
         // Cargar Imágenes Globales
@@ -124,10 +134,7 @@
                 if (key === defaultKey) option.selected = true;
                 select.appendChild(option);
             }
-            const customOpt = document.createElement('option');
-            customOpt.value = 'custom';
-            customOpt.textContent = 'Personalizado';
-            select.appendChild(customOpt);
+
 
             if (mcColors[defaultKey]) picker.value = mcColors[defaultKey].hex;
 
@@ -215,8 +222,8 @@
 
         // --- Dibujado ---
         function draw() {
-            const width = 320;
-            const height = 64;
+            const width = 1000;
+            const height = 221;
             canvas.width = width;
             canvas.height = height;
             ctx.clearRect(0, 0, width, height);
@@ -235,8 +242,8 @@
             }
 
             // Icono
-            const iconSize = 32; 
-            const iconX = 16;
+            const iconSize = 100; 
+            const iconX = 50;
             const iconY = (height - iconSize) / 2;
             
             if (iconImage.complete && iconImage.naturalWidth > 0) {
@@ -245,20 +252,20 @@
             }
 
             // Texto
-            const textX = 60;
-            ctx.font = `12px "${fontName}", "Press Start 2P", monospace`;
+            const textX = 180;
+            ctx.font = `40px "${fontName}", "Press Start 2P", monospace`;
             ctx.textBaseline = 'top';
             
             // Top Text
             ctx.fillStyle = topColorPicker.value;
             ctx.shadowColor = "#000000"; 
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-            ctx.fillText(topTextInput.value, textX, 24);
+            ctx.shadowOffsetX = 4;
+            ctx.shadowOffsetY = 4;
+            ctx.fillText(topTextInput.value, textX, 80);
 
             // Bottom Text
             ctx.fillStyle = bottomColorPicker.value;
-            ctx.fillText(bottomTextInput.value, textX, 44);
+            ctx.fillText(bottomTextInput.value, textX, 150);
             
             ctx.shadowColor = "transparent";
         }
@@ -266,7 +273,7 @@
         window.downloadImage = function() {
             try {
                 const link = document.createElement('a');
-                link.download = 'logro-minecraft.png';
+                link.download = `minecraft-advancement_"${topTextInput.value}_${bottomTextInput.value}".png`;
                 link.href = canvas.toDataURL();
                 link.click();
             } catch (e) {
