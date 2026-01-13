@@ -11,66 +11,139 @@
 
     <h1>Generador de Logros</h1>
 
-    <div class="container">
-        <div class="input-group">
-            <label for="topText">Texto Superior (Amarillo)</label>
-            <input type="text" id="topText" value="¡Logro obtenido!">
+    <div class="app-layout">
+        
+        <!-- Panel Izquierdo: Configuración -->
+        <div class="panel config-panel">
+            
+            <div class="input-group">
+                <label for="topText">Texto Superior</label>
+                <div class="text-controls">
+                    <input type="text" id="topText" value="¡Logro obtenido!">
+                    <select id="topColorSelect" title="Color de Minecraft"></select>
+                    <input type="color" id="topColorPicker" value="#FFFF55" title="Color Personalizado">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="bottomText">Texto Inferior</label>
+                <div class="text-controls">
+                    <input type="text" id="bottomText" value="Madera Nueva">
+                    <select id="bottomColorSelect" title="Color de Minecraft"></select>
+                    <input type="color" id="bottomColorPicker" value="#FFFFFF" title="Color Personalizado">
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <canvas id="canvas" width="320" height="64" style="display: block; max-width: 100%; height: auto; image-rendering: pixelated;"></canvas>
+            </div>
+
+            <button onclick="window.downloadImage()">Descargar PNG</button>
         </div>
 
-        <div class="input-group">
-            <label for="bottomText">Texto Inferior (Blanco)</label>
-            <input type="text" id="bottomText" value="Madera Nueva">
-        </div>
+        <!-- Panel Derecho: Selector de Íconos -->
+        <div class="panel icon-panel">
+            <h3>Seleccionar Ícono</h3>
+            <input type="text" id="iconGridSearch" class="icon-search-bar" placeholder="Buscar ícono..." autocomplete="off">
+            
+            <div id="iconGrid" class="icon-grid">
+                <!-- Se llena con JS -->
+            </div>
 
-        <div class="input-group">
-            <label for="iconSearch">Ícono</label>
-            <div class="search-container">
-                <input type="text" id="iconSearch" placeholder="Buscar ícono (ej. Golden Apple)..." autocomplete="off" value="Grass Block">
-                <div id="searchResults" class="search-results"></div>
+            <div class="custom-upload-group">
+                <label for="customIconInput">Subir textura personalizada:</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="customIconInput" accept="image/*">
+                </div>
             </div>
         </div>
 
-        <div class="preview-area">
-            <!-- Canvas visible directly -->
-            <canvas id="canvas" width="320" height="64" style="display: block; max-width: 100%; height: auto; image-rendering: pixelated;"></canvas>
-        </div>
-        <!-- Change font to Minecraftia -->
-        <button type="button" onclick="window.downloadImage()">Descargar Logro</button>
-
-        
-        
-         
-        
     </div>
 
     <script type="module">
         import { items } from './src/items.js';
 
+        // Elementos DOM
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const topTextInput = document.getElementById('topText');
         const bottomTextInput = document.getElementById('bottomText');
-        const iconInput = document.getElementById('iconSearch');
-        const resultsDiv = document.getElementById('searchResults');
+        
+        const iconGrid = document.getElementById('iconGrid');
+        const iconSearch = document.getElementById('iconGridSearch');
+        const customIconInput = document.getElementById('customIconInput');
+
+        // Color Controls
+        const topColorSelect = document.getElementById('topColorSelect');
+        const topColorPicker = document.getElementById('topColorPicker');
+        const bottomColorSelect = document.getElementById('bottomColorSelect');
+        const bottomColorPicker = document.getElementById('bottomColorPicker');
 
         // Estado
-        let currentIconId = 'grass_block'; // Default
+        let currentIconId = 'grass_block';
         const fontName = 'Minecraftia'; 
         
-        // Cargar recursos estáticos
+        // Colores Minecraft
+        const mcColors = {
+            'yellow': { name: 'Amarillo', hex: '#FFFF55' },
+            'white': { name: 'Blanco', hex: '#FFFFFF' },
+            'gold': { name: 'Oro', hex: '#FFAA00' },
+            'green': { name: 'Verde', hex: '#55FF55' },
+            'dark_green': { name: 'Verde Oscuro', hex: '#00AA00' },
+            'red': { name: 'Rojo', hex: '#FF5555' },
+            'dark_red': { name: 'Rojo Oscuro', hex: '#AA0000' },
+            'aqua': { name: 'Aqua', hex: '#55FFFF' },
+            'dark_aqua': { name: 'Aqua Oscuro', hex: '#00AAAA' },
+            'blue': { name: 'Azul', hex: '#5555FF' },
+            'dark_blue': { name: 'Azul Oscuro', hex: '#0000AA' },
+            'light_purple': { name: 'Rosa', hex: '#FF55FF' },
+            'dark_purple': { name: 'Morado', hex: '#AA00AA' },
+            'gray': { name: 'Gris', hex: '#AAAAAA' },
+            'dark_gray': { name: 'Gris Oscuro', hex: '#555555' },
+            'black': { name: 'Negro', hex: '#000000' }
+        };
+
+        // Cargar Imágenes Globales
         const bgImage = new Image();
         bgImage.src = 'assets/Logro3.png';
         bgImage.onload = () => draw();
-        bgImage.onerror = () => console.warn("Fondo no encontrado, usando fallback.");
+        bgImage.onerror = () => console.warn("Fondo no encontrado.");
 
         const iconImage = new Image();
         iconImage.crossOrigin = "Anonymous";
         iconImage.onload = () => draw();
 
-        // Inicializar icono por defecto
-        updateIconImage(currentIconId);
+        // --- Inicialización de Colores ---
+        function setupColorControl(select, picker, defaultKey) {
+            for (const [key, val] of Object.entries(mcColors)) {
+                const option = document.createElement('option');
+                option.value = val.hex;
+                option.textContent = val.name;
+                if (key === defaultKey) option.selected = true;
+                select.appendChild(option);
+            }
+            const customOpt = document.createElement('option');
+            customOpt.value = 'custom';
+            customOpt.textContent = 'Personalizado';
+            select.appendChild(customOpt);
 
-        // --- Lógica de Formato y Búsqueda ---
+            if (mcColors[defaultKey]) picker.value = mcColors[defaultKey].hex;
+
+            select.addEventListener('change', () => {
+                if (select.value !== 'custom') picker.value = select.value;
+                draw();
+            });
+            picker.addEventListener('input', () => {
+                select.value = 'custom';
+                draw();
+            });
+        }
+
+        setupColorControl(topColorSelect, topColorPicker, 'yellow');
+        setupColorControl(bottomColorSelect, bottomColorPicker, 'white');
+
+
+        // --- Lógica del Grid de Iconos ---
 
         function formatName(id) {
             return id.split('_')
@@ -78,83 +151,75 @@
                 .join(' ');
         }
 
-        function filterItems(query) {
-            const lowerQuery = query.toLowerCase();
-            return items.filter(id => {
-                const name = formatName(id);
-                return name.toLowerCase().includes(lowerQuery) || id.includes(lowerQuery);
-            }).slice(0, 10); // Limit results
+        function renderGrid(filter = "") {
+            iconGrid.innerHTML = '';
+            const lowerFilter = filter.toLowerCase();
+            
+            // Filtrar items
+            const filteredItems = items.filter(id => {
+                return id.includes(lowerFilter) || formatName(id).toLowerCase().includes(lowerFilter);
+            });
+
+            // Renderizar items (lazy load simple con URLs)
+            filteredItems.forEach(id => {
+                const slot = document.createElement('div');
+                slot.className = `icon-slot ${id === currentIconId ? 'selected' : ''}`;
+                slot.title = formatName(id); // Tooltip
+                slot.dataset.id = id;
+                
+                const img = document.createElement('img');
+                img.src = `https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/item/${id}.png`;
+                img.alt = id;
+                img.loading = 'lazy'; // Importante para rendimiento
+                
+                slot.appendChild(img);
+                
+                slot.addEventListener('click', () => {
+                    selectIcon(id);
+                });
+
+                iconGrid.appendChild(slot);
+            });
         }
 
-        function selectItem(id) {
+        function selectIcon(id) {
             currentIconId = id;
-            iconInput.value = formatName(id);
-            resultsDiv.classList.remove('visible');
-            updateIconImage(id);
+            // Update visual selection
+            document.querySelectorAll('.icon-slot').forEach(el => el.classList.remove('selected'));
+            const active = document.querySelector(`.icon-slot[data-id="${id}"]`);
+            if(active) active.classList.add('selected');
+
         }
 
-        function updateIconImage(id) {
-            // URL del sprite oficial
-            const url = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${id}.png`;
-            iconImage.src = url;
-            // Si falla (ej. es un bloque y la URL es diferente, o no existe), podríamos intentar fallback
-            // Por simplicidad en este paso, asumimos items.js tiene items válidos.
-        }
-
-        // --- Event Listeners Búsqueda ---
-
-        iconInput.addEventListener('input', (e) => {
-            const query = e.target.value;
-            if (query.length < 2) {
-                resultsDiv.classList.remove('visible');
-                return;
-            }
-
-            const matches = filterItems(query);
-            if (matches.length > 0) {
-                resultsDiv.innerHTML = matches.map(id => {
-                    const name = formatName(id);
-                    const imgUrl = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${id}.png`;
-                    return `
-                        <div class="search-item" data-id="${id}">
-                            <img src="${imgUrl}" alt="${id}" loading="lazy">
-                            <span>${name}</span>
-                        </div>
-                    `;
-                }).join('');
-                resultsDiv.classList.add('visible');
-            } else {
-                resultsDiv.classList.remove('visible');
-            }
+        // Búsqueda en Grid
+        iconSearch.addEventListener('input', (e) => {
+            renderGrid(e.target.value);
         });
 
-        // Click en resultados
-        resultsDiv.addEventListener('click', (e) => {
-            const itemDiv = e.target.closest('.search-item');
-            if (itemDiv) {
-                selectItem(itemDiv.dataset.id);
-            }
-        });
-
-        // Cerrar al hacer click fuera
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-container')) {
-                resultsDiv.classList.remove('visible');
+        // Carga Custom Icon
+        customIconInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    iconImage.src = evt.target.result;
+                    // Deseleccionar grid visualmente
+                    document.querySelectorAll('.icon-slot').forEach(el => el.classList.remove('selected'));
+                    currentIconId = 'custom';
+                };
+                reader.readAsDataURL(file);
             }
         });
 
         // --- Dibujado ---
-
         function draw() {
             const width = 320;
             const height = 64;
-            
-            // Reset canvas
             canvas.width = width;
             canvas.height = height;
             ctx.clearRect(0, 0, width, height);
 
-            // 1. Dibujar Fondo
+            // Fondo
             if (bgImage.complete && bgImage.naturalWidth > 0) {
                 ctx.drawImage(bgImage, 0, 0, width, height);
             } else {
@@ -167,37 +232,35 @@
                 ctx.fillRect(2, 2, width-4, height-4);
             }
 
-            // 2. Dibujar Icono
+            // Icono
             const iconSize = 32; 
             const iconX = 16;
             const iconY = (height - iconSize) / 2;
             
             if (iconImage.complete && iconImage.naturalWidth > 0) {
-                ctx.imageSmoothingEnabled = false; // Pixel art look
+                ctx.imageSmoothingEnabled = false;
                 ctx.drawImage(iconImage, iconX, iconY, iconSize, iconSize);
             }
 
-            // 3. Dibujar Texto
+            // Texto
             const textX = 60;
             ctx.font = `12px "${fontName}", "Press Start 2P", monospace`;
             ctx.textBaseline = 'top';
             
-            // Top Text (Yellow)
-            ctx.fillStyle = '#FFFF55';
-            ctx.shadowColor = "#000000"; // Sombra simple para legibilidad si el fondo es claro
+            // Top Text
+            ctx.fillStyle = topColorPicker.value;
+            ctx.shadowColor = "#000000"; 
             ctx.shadowOffsetX = 2;
             ctx.shadowOffsetY = 2;
             ctx.fillText(topTextInput.value, textX, 14);
 
-            // Bottom Text (White)
-            ctx.fillStyle = '#FFFFFF';
+            // Bottom Text
+            ctx.fillStyle = bottomColorPicker.value;
             ctx.fillText(bottomTextInput.value, textX, 36);
             
-            // Reset shadow
             ctx.shadowColor = "transparent";
         }
 
-        // Exportar función globalmente para el botón onclick del HTML
         window.downloadImage = function() {
             try {
                 const link = document.createElement('a');
@@ -205,17 +268,23 @@
                 link.href = canvas.toDataURL();
                 link.click();
             } catch (e) {
-                alert("Error al descargar. Intente usar un servidor local (npm run dev).");
-                console.error(e);
+                alert("Error al descargar. Use un servidor local.");
             }
         };
 
-        // Listeners de texto
+        // Listeners
         topTextInput.addEventListener('input', draw);
         bottomTextInput.addEventListener('input', draw);
         
-        // Esperar fuentes
+        // Init
         document.fonts.ready.then(draw);
+        renderGrid(); // Renderizar grid inicial
+        updateIconImage('grass_block'); // Cargar icono inicial si no está en cache
+        
+        function updateIconImage(id) {
+             const url = `https://assets.mcasset.cloud/1.20.1/assets/minecraft/textures/item/${id}.png`;
+             iconImage.src = url;
+        }
 
     </script>
 </body>
