@@ -9,7 +9,9 @@
 </head>
 <body>
 
-    <h1>Achievement Generator</h1>
+    <button id="themeToggle" class="theme-toggle" title="Cambiar tema">🌙</button>
+
+    <h1>Generador de Logros</h1>
 
     <div class="app-layout">
         
@@ -291,6 +293,23 @@
         if (currentIconData) {
             iconImage.src = `assets/icons2/${currentIconData.id}.${currentIconData.ext}`;
         }
+
+        // --- Theme Toggle Logic ---
+        const themeBtn = document.getElementById('themeToggle');
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeBtn.textContent = '☀️';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            themeBtn.textContent = isLight ? '☀️' : '🌙';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
 
     </script>
 </body>
