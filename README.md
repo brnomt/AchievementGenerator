@@ -6,14 +6,14 @@ A minimalist, high-performance web application to create custom Minecraft-style 
 
 ## ✨ Features
 
-*   **High Resolution:** Generates crisp images at **1000x221** pixels, matching the official background quality.
+*   **High Resolution:** Generates crisp images at **1000x221** pixels, perfect for video editing.
 *   **Official Assets:** Uses a comprehensive library of local Minecraft item textures (PNG and WebP).
-*   **Searchable Icon Grid:** Quickly find icons through an interactive 5x5 grid with real-time filtering.
-*   **Custom Textures:** Don't see the icon you need? Upload your own texture directly from your computer.
+*   **Searchable Icon Grid:** Quickly find icons through a grid with real-time filtering.
+*   **Custom Textures:** Don't see the icon you need? Upload your own texture directly from your computer (this will be used locally).
 *   **Text Customization:**
     *   Separate fields for Top and Bottom text.
     *   Official Minecraft color presets (Yellow, Gold, Red, Aqua, etc.).
-    *   Custom HSV/RGB color picker for complete creative freedom.
+    *   Custom HSV/RGB color picker.
 *   **Dual Themes:** Fully integrated **Dark Mode** (deep black) and **Light Mode** with persistence (saves to local storage).
 *   **Vercel Ready:** Pre-configured for instant deployment using Vite and NPM.
 
@@ -58,8 +58,8 @@ A minimalist, high-performance web application to create custom Minecraft-style 
 ## 🤝 Credits
 
 Developed with ❤️ by:
-*   **lFideo**
-*   **Snoker**
+*   [**lFideo**](https://github.com/brnomt)
+*   [**Snoker**](https://github.com/iamnotSnoker)
 
 
 ## ☕ Donate
